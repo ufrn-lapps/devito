@@ -11,6 +11,7 @@ AccessibleInfo = namedtuple(
     'AccessibleInfo',
     ['accessible', 'safe_accessible', 'time', 'shift', 'origin_name'])
 
+
 OpsDatDecl = namedtuple(
     'OpsDatDecl',
     ['dim_val', 'base_val', 'd_p_val', 'd_m_val', 'ops_decl_dat'])
