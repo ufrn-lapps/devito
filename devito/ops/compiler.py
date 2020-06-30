@@ -3,7 +3,7 @@ import subprocess
 import warnings
 
 from codepy.jit import compile_from_string
-from devito.logger import warning
+from devito.logger import debug, warning
 from devito.parameters import configuration
 
 
@@ -54,22 +54,35 @@ class CompilerOPS(configuration['compiler'].__class__):
     def _translate_ops(self, soname, ccode, hcode):
         # Creating files
         file_name = str(self.get_jit_dir().joinpath(soname))
-        h_file = open("%s.h" % (file_name), "w")
-        c_file = open("%s.cpp" % (file_name), "w")
 
-        c_file.write(ccode)
-        h_file.write(hcode)
+        if not configuration['jit-backdoor']:
+            h_file = open("%s.h" % (file_name), "w")
+            c_file = open("%s.cpp" % (file_name), "w")
+
+            c_file.write(ccode)
+            h_file.write(hcode)
+
+        else:
+            warning("Dropping generated code in favor of whatever is in \'%s.cpp\' and \'%s.h\'" % (file_name, file_name))
+
+            h_file = open("%s.h" % (file_name), "r")
+            c_file = open("%s.cpp" % (file_name), "r")
 
         c_file.close()
         h_file.close()
+
 
         if self._ops_install_path:
             # Calling OPS Translator
             translator = '%s/../ops_translator/c/ops.py' % (self._ops_install_path)
             subprocess.run([translator, c_file.name], cwd=self.get_jit_dir())
+            if configuration['debug-compiler']:
+                print(translator, c_file.name)
         else:
             warning("Couldn't find OPS_INSTALL_PATH \
                 environment variable, please check your OPS installation")
+
+        debug('End of OPS translation...')
 
     def _compile_cuda(self, soname):
         # CUDA kernel compilation

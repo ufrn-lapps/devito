@@ -12,7 +12,7 @@ from devito.ops.node_factory import OPSNodeFactory
 from devito.ops.types import Array, OpsAccessible, OpsDat, OpsStencil
 from devito.ops.utils import namespace, OpsDatDecl
 from devito.symbolics import Add, Byref, ListInitializer, Literal
-from devito.tools import dtype_to_cstr
+from devito.tools import Signer, dtype_to_cstr
 from devito.types import Constant, DefaultDimension, Symbol
 
 
@@ -51,7 +51,7 @@ def opsit(trees, count, name_to_ops_dat, block, dims):
             stencil_arrays_initializations.append(initialization)
 
     ops_kernel = Callable(
-        namespace['ops_kernel'](count),
+        namespace['ops_kernel'](count, Signer._digest(parameters)),
         ops_expressions,
         "void",
         parameters)
